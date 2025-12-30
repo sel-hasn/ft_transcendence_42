@@ -1,8 +1,11 @@
 {
   "name": "ft_transcendence_42",
   "version": "1.0.0",
-  "main": "index.js",
+  "type": "module",
+  "main": "src/server.ts",
   "scripts": {
+    "start": "tsx src/server.ts",
+    "dev": "tsx watch src/server.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -11,5 +14,9 @@
   "description": "",
   "dependencies": {
     "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "tsx": "^4.21.0"
   }
 }
