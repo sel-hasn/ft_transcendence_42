@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import { verifyJwt } from '../utils/jwt.utils';
-import { getDb } from '../core/database';
-import { User } from '../types';
+import { verifyJwt } from '../utils/jwt.utils.js';
+import { getDb } from '../core/database.js';
+import { User } from '../types.js';
 
 export const deserializeUser = async (req: Request, res: Response, next: NextFunction) => {
     const accessToken = (req.headers.authorization || '').replace(/^Bearer\s/, '');

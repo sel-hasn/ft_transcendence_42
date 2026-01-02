@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcrypt';
-import { getDb } from '../core/database';
-import { signJwt, verifyJwt } from '../utils/jwt.utils';
-import { config } from '../config';
-import { AppError } from '../utils/AppError';
-import { catchAsync } from '../utils/catchAsync';
-import { User } from '../types';
+import { getDb } from '../core/database.js';
+import { signJwt, verifyJwt } from '../utils/jwt.utils.js';
+import { config } from '../config/index.js';
+import { AppError } from '../utils/AppError.js';
+import { catchAsync } from '../utils/catchAsync.js';
+import { User } from '../types.js';
 
 // Cookie options
 // const cookieOptions = {
@@ -68,12 +68,12 @@ export const loginHandler = catchAsync(async (req: Request, res: Response, next:
     // Create tokens
     const accessToken = signJwt(
         { id: user.id, username: user.username },
-        { expiresIn: config.jwtAccessExpiresIn }
+        { expiresIn: config.jwtAccessExpiresIn as any } // Cast to any to avoid string vs StringValue mismatch
     );
 
     const refreshToken = signJwt(
         { id: user.id, username: user.username },
-        { expiresIn: config.jwtRefreshExpiresIn }
+        { expiresIn: config.jwtRefreshExpiresIn as any }
     );
 
     res.status(200).json({
@@ -112,7 +112,7 @@ export const refreshAccessTokenHandler = catchAsync(async (req: Request, res: Re
     // Sign new access token
     const accessToken = signJwt(
         { id: user.id, username: user.username },
-        { expiresIn: config.jwtAccessExpiresIn }
+        { expiresIn: config.jwtAccessExpiresIn as any }
     );
 
     res.status(200).json({

@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import { getDb } from '../core/database';
-import { catchAsync } from '../utils/catchAsync';
-import { AppError } from '../utils/AppError';
-import { User } from '../types';
+import { getDb } from '../core/database.js';
+import { catchAsync } from '../utils/catchAsync.js';
+import { AppError } from '../utils/AppError.js';
+import { User } from '../types.js';
 
 // Get Current User
 export const getCurrentUserHandler = (req: Request, res: Response) => {
@@ -49,7 +49,7 @@ export const getUserByIdHandler = catchAsync(async (req: Request, res: Response,
 
 // Update User
 export const updateUserHandler = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const { displayName, username, avatarUrl } = req.body;
+    const { username, avatarUrl } = req.body;
 
     // @ts-ignore
     const userId = res.locals.user.id;

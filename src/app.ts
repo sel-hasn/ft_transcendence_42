@@ -1,10 +1,10 @@
 import express, { Application, Request, Response, NextFunction } from "express";
 import cors from 'cors';
 import morgan from 'morgan';
-import authRoutes from './routes/auth.routes';
-import userRoutes from './routes/user.routes';
-import { deserializeUser } from './middlewares/deserializeUser';
-import { AppError } from './utils/AppError';
+import authRoutes from './routes/auth.routes.js';
+import userRoutes from './routes/user.routes.js';
+import { deserializeUser } from './middlewares/deserializeUser.js';
+import { AppError } from './utils/AppError.js';
 
 const app: Application = express();
 

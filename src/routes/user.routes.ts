@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { getAllUsersHandler, getCurrentUserHandler, getUserByIdHandler, updateUserHandler } from '../controllers/user.controller';
-import { requireUser } from '../middlewares/requireUser';
-import { validateResource } from '../middlewares/validateResource';
-import { updateUserSchema } from '../schemas/user.schema';
+import { getAllUsersHandler, getCurrentUserHandler, getUserByIdHandler, updateUserHandler } from '../controllers/user.controller.js';
+import { requireUser } from '../middlewares/requireUser.js';
+import { validateResource } from '../middlewares/validateResource.js';
+import { updateUserSchema } from '../schemas/user.schema.js';
 
 const router = Router();
 

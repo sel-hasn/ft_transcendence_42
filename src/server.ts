@@ -1,7 +1,7 @@
 //server.ts
-import { config } from './config';
-import app from './app';
-import { closeDb, initDatabase } from './core/database';
+import { config } from './config/index.js';
+import app from './app.js';
+import { closeDb, initDatabase } from './core/database.js';
 
 // Initialize the database before starting the server
 initDatabase();
