@@ -2,7 +2,6 @@ export interface User {
     id: number;
     username: string;
     email: string;
-    display_name: string | null;
     password_hash: string;
     avatar_url: string;
     level: number;

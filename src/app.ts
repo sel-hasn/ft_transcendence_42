@@ -1,18 +1,49 @@
-//app.ts
-import express, { Application } from "express";
+import express, { Application, Request, Response, NextFunction } from "express";
 import cors from 'cors';
 import morgan from 'morgan';
+import authRoutes from './routes/auth.routes';
+import userRoutes from './routes/user.routes';
+import { deserializeUser } from './middlewares/deserializeUser';
+import { AppError } from './utils/AppError';
 
 const app: Application = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:5173', // Adjust for frontend
+    credentials: true
+}));
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
+// Custom Middleware
+app.use(deserializeUser);
+
+// Routes
 app.get('/', (req, res) => {
-    res.json({ message: 'Hello from Express! 🚀'});
+    res.json({ message: 'Hello from Express! 🚀' });
+});
+
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+
+// 404 Handler
+app.use((req, res, next) => {
+    next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+});
+
+// Global Error Handler
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+    err.statusCode = err.statusCode || 500;
+    err.status = err.status || 'error';
+
+    res.status(err.statusCode).json({
+        status: err.status,
+        message: err.message,
+        ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    });
 });
 
 export default app;
