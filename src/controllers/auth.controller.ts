@@ -67,12 +67,12 @@ export const loginHandler = catchAsync(async (req: Request, res: Response, next:
     // Create tokens
     const accessToken = signJwt(
         { id: user.id, username: user.username },
-        { expiresIn: config.jwtAccessExpiresIn as any } // Cast to any to avoid string vs StringValue mismatch
+        { expiresIn: config.jwtAccessExpiresIn }
     );
 
     const refreshToken = signJwt(
         { id: user.id, username: user.username },
-        { expiresIn: config.jwtRefreshExpiresIn as any }
+        { expiresIn: config.jwtRefreshExpiresIn }
     );
 
     res.status(200).json({
@@ -111,7 +111,7 @@ export const refreshAccessTokenHandler = catchAsync(async (req: Request, res: Re
     // Sign new access token
     const accessToken = signJwt(
         { id: user.id, username: user.username },
-        { expiresIn: config.jwtAccessExpiresIn as any }
+        { expiresIn: config.jwtAccessExpiresIn }
     );
 
     res.status(200).json({
