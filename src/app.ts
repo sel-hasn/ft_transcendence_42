@@ -1,5 +1,5 @@
 import express, { Application, Request, Response, NextFunction } from "express";
-
+import cors from 'cors';
 import morgan from 'morgan';
 import authRoutes from './routes/auth.routes.js';
 import userRoutes from './routes/user.routes.js';
@@ -9,7 +9,10 @@ import { AppError } from './utils/AppError.js';
 const app: Application = express();
 
 // Middleware
-
+app.use(cors({
+    origin: 'http://localhost:5173', // Adjust for frontend
+    credentials: true
+}));
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
