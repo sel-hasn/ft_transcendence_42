@@ -16,7 +16,7 @@ export function initDatabase(): SQLiteDatabase {
 
     const dbPath = path.join(dbDir, 'app.db');
     db = new Database(dbPath);
-    db.pragma('foreing_keys = ON');
+    db.pragma('foreign_keys = ON');
 
     const schemaPath = path.join(__dirname, 'db', 'schema.sql');
     const schema = fs.readFileSync(schemaPath, 'utf-8');

@@ -23,7 +23,8 @@ export const deserializeUser = async (req: Request, res: Response, next: NextFun
             if (user) {
                 res.locals.user = user;
             }
-        } catch (e) {
+        } catch (e: any) {
+            console.error('Error in deserializeUser middleware:', e);
             // DB error or user not found, just continue without user
         }
     }

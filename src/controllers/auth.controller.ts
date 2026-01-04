@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import bcrypt from 'bcrypt';
+import { hashPassword, verifyPassword } from '../utils/crypt.js';
 import { getDb } from '../core/database.js';
 import { signJwt, verifyJwt } from '../utils/jwt.utils.js';
 import { config } from '../config/index.js';
@@ -28,8 +28,7 @@ export const registerHandler = catchAsync(async (req: Request, res: Response, ne
     }
 
     // Hash password
-    const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash(password, salt);
+    const passwordHash = await hashPassword(password);
 
     // Insert user
     const stmt = db.prepare(`
@@ -61,7 +60,7 @@ export const loginHandler = catchAsync(async (req: Request, res: Response, next:
     // Find user
     const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email) as User | undefined;
 
-    if (!user || !(await bcrypt.compare(password, user.password_hash))) {
+    if (!user || !(await verifyPassword(password, user.password_hash))) {
         return next(new AppError('Invalid email or password', 401));
     }
 
