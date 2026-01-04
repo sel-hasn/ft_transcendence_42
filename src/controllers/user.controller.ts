@@ -4,12 +4,19 @@ import { catchAsync } from '../utils/catchAsync.js';
 import { AppError } from '../utils/AppError.js';
 import { User } from '../types.js';
 
+// Helper to sanitize user object
+const sanitizeUser = (user: any) => {
+    const { password_hash, two_fa_secret, ...safeUser } = user;
+    return safeUser;
+};
+
 // Get Current User
 export const getCurrentUserHandler = (req: Request, res: Response) => {
+    const user = res.locals.user;
     res.status(200).json({
         status: 'success',
         data: {
-            user: res.locals.user
+            user: sanitizeUser(user)
         }
     });
 };
@@ -85,7 +92,7 @@ export const updateUserHandler = catchAsync(async (req: Request, res: Response, 
     res.status(200).json({
         status: 'success',
         data: {
-            user: updatedUser
+            user: sanitizeUser(updatedUser)
         }
     });
 });

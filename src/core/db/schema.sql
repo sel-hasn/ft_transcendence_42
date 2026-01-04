@@ -52,6 +52,13 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- Token Blacklist (for server-side logout)
+CREATE TABLE IF NOT EXISTS token_blacklist (
+    token TEXT PRIMARY KEY,
+    expires_at DATETIME NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Simple Matchmaking Queue
 CREATE TABLE IF NOT EXISTS matchmaking_queue (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

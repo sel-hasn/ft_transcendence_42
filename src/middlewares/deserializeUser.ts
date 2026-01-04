@@ -18,6 +18,13 @@ export const deserializeUser = async (req: Request, res: Response, next: NextFun
 
         // Check if user still exists in DB
         const db = getDb();
+
+        // Check blacklist
+        const isBlacklisted = db.prepare('SELECT token FROM token_blacklist WHERE token = ?').get(accessToken);
+        if (isBlacklisted) {
+            return next();
+        }
+
         try {
             const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId) as User | undefined;
             if (user) {

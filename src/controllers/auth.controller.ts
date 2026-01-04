@@ -121,10 +121,28 @@ export const refreshAccessTokenHandler = catchAsync(async (req: Request, res: Re
 });
 
 // Logout
-export const logoutHandler = (req: Request, res: Response) => {
-    // Client should remove the token from storage
+export const logoutHandler = catchAsync(async (req: Request, res: Response) => {
+    const accessToken = (req.headers.authorization || '').replace(/^Bearer\s/, '');
+
+    if (accessToken) {
+        const { decoded, valid } = verifyJwt(accessToken);
+        if (valid && decoded) {
+            const db = getDb();
+            // @ts-ignore
+            const expiresAt = new Date(decoded.exp * 1000).toISOString();
+
+            try {
+                const stmt = db.prepare('INSERT INTO token_blacklist (token, expires_at) VALUES (?, ?)');
+                stmt.run(accessToken, expiresAt);
+            } catch (e) {
+                // Token likely already blacklisted or other error, safe to ignore for logout
+                console.error('Logout error (token blacklist):', e);
+            }
+        }
+    }
+
     res.status(200).json({
         status: 'success',
         message: 'Logged out successfully'
     });
-};
+});

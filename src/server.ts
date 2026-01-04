@@ -3,8 +3,11 @@ import { config } from './config/index.js';
 import app from './app.js';
 import { closeDb, initDatabase } from './core/database.js';
 
+import { startCleanupJob } from './core/cron.js';
+
 // Initialize the database before starting the server
 initDatabase();
+startCleanupJob();
 
 const server = app.listen(config.port, () => {
     console.log(`🚀 Server running on http://localhost:${config.port}`);
