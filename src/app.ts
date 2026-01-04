@@ -5,12 +5,13 @@ import userRoutes from './routes/user.routes.js';
 import { AppError } from './utils/AppError.js';
 import morgan from 'morgan';
 import cors from 'cors';
+import { config } from './config/index.js';
 
 const app: Application = express();
 
 // Middleware
 app.use(cors({
-    origin: 'http://localhost:5173', // Adjust for frontend
+    origin: config.corsOrigin,
     credentials: true
 }));
 app.use(morgan('dev'));
