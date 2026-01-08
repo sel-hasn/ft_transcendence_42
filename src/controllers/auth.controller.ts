@@ -57,14 +57,30 @@ export const loginHandler = catchAsync(async (req: Request, res: Response, next:
     const { email, password } = req.body;
     const db = getDb();
 
-    // Find user
     const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email) as User | undefined;
 
     if (!user || !(await verifyPassword(password, user.password_hash))) {
         return next(new AppError('Invalid email or password', 401));
     }
 
-    // Create tokens
+    // 2FA CHECK
+    if (user.is_2fa_enabled) {
+        // Create a temporary token valid for only 5 minutes
+        // We add a special flag 'login_step: "2fa"' so this token cannot be used for normal access
+        const tempToken = signJwt(
+            { id: user.id, username: user.username, login_step: '2fa' },
+            { expiresIn: '5m' }
+        );
+
+        return res.status(200).json({
+            status: 'success',
+            message: '2FA required',
+            action_required: '2fa_auth',
+            tempToken // Frontend/Postman must send this back with the code
+        });
+    }
+
+    // Normal Login
     const accessToken = signJwt(
         { id: user.id, username: user.username },
         { expiresIn: config.jwtAccessExpiresIn }
@@ -77,10 +93,7 @@ export const loginHandler = catchAsync(async (req: Request, res: Response, next:
 
     res.status(200).json({
         status: 'success',
-        tokens: {
-            accessToken,
-            refreshToken
-        }
+        tokens: { accessToken, refreshToken }
     });
 });
 

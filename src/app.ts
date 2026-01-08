@@ -1,6 +1,7 @@
 import express, { Application, Request, Response, NextFunction } from "express";
 import { deserializeUser } from './middlewares/deserializeUser.js';
 import authRoutes from './routes/auth.routes.js';
+import twoFARoutes from './routes/2fa.routes.js';
 import userRoutes from './routes/user.routes.js';
 import { AppError } from './utils/AppError.js';
 import morgan from 'morgan';
@@ -28,6 +29,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/auth/2fa', twoFARoutes);
 app.use('/api/users', userRoutes);
 
 // 404 Handler

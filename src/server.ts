@@ -2,7 +2,6 @@
 import { config } from './config/index.js';
 import app from './app.js';
 import { closeDb, initDatabase } from './core/database.js';
-
 import { startCleanupJob } from './core/cron.js';
 
 // Initialize the database before starting the server

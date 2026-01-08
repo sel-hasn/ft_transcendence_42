@@ -6,6 +6,7 @@ export interface User {
     avatar_url: string;
     level: number;
     is_2fa_enabled: number; // SQLite uses 0/1 for boolean
+    two_fa_secret: string | null;
     status: 'online' | 'offline' | 'in_game';
     created_at: string;
 }
