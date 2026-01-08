@@ -12,6 +12,11 @@ export const deserializeUser = async (req: Request, res: Response, next: NextFun
 
     const { decoded, valid } = verifyJwt(accessToken);
 
+    // Prevent using the temporary 2FA token for general access
+    if (decoded && (decoded as any).login_step === '2fa') {
+        return next();
+    }
+
     if (decoded && valid) {
         // @ts-ignore - attaching user to req
         const userId = (decoded as any).id;
