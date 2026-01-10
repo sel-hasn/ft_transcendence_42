@@ -28,7 +28,7 @@ export const generate2FAHandler = catchAsync(async (req: Request, res: Response,
         status: 'success',
         data: {
             qrCode: imageUrl, // Postman user: Copy this string!
-            secret // Optional: meaningful for manual entry if camera breaks
+            // secret // Optional: meaningful for manual entry if camera breaks
         }
     });
 });

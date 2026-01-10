@@ -8,6 +8,9 @@ import morgan from 'morgan';
 import cors from 'cors';
 import { config } from './config/index.js';
 
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './config/swagger.js';
+
 const app: Application = express();
 
 // Middleware
@@ -28,6 +31,7 @@ app.get('/', (req, res) => {
     res.json({ message: 'Hello from Express! 🚀' });
 });
 
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api/auth', authRoutes);
 app.use('/api/auth/2fa', twoFARoutes);
 app.use('/api/users', userRoutes);
