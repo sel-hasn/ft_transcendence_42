@@ -1,8 +1,13 @@
 import { Router } from 'express';
-import { getAllUsersHandler, getCurrentUserHandler, getUserByIdHandler, updateUserHandler } from '../controllers/user.controller.js';
-import { requireUser } from '../middlewares/requireUser.js';
-import { validateResource } from '../middlewares/validateResource.js';
+import {
+  getAllUsersHandler,
+  getCurrentUserHandler,
+  getUserbyIdHandler,
+  updateUserHandler,
+} from '../controllers/user.controller.js';
+import { requireUser } from '../../middleware/requireUser.js';
 import { updateUserSchema } from '../schemas/user.schema.js';
+import { validateResource } from '../../middleware/validateResource.js';
 
 const router = Router();
 
@@ -145,15 +150,17 @@ router.get('/', getAllUsersHandler); // Simplified list
  * /users/{id}:
  *   get:
  *     summary: Get user by ID
- *     description: Retrieve detailed profile information for a specific user by their ID.
+ *     description: Retrieve detailed profile information for a specific user by their ID. Returns public profile data including stats.
  *     tags: [Users]
  *     parameters:
  *       - in: path
  *         name: id
  *         schema:
  *           type: integer
+ *           minimum: 1
  *         required: true
  *         description: Numeric ID of the user to retrieve
+ *         example: 1
  *     responses:
  *       200:
  *         description: User profile retrieved successfully
@@ -176,6 +183,9 @@ router.get('/', getAllUsersHandler); // Simplified list
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ApiError'
+ *             example:
+ *               status: fail
+ *               message: User not found
  *       500:
  *         description: Internal server error
  *         content:
@@ -183,6 +193,6 @@ router.get('/', getAllUsersHandler); // Simplified list
  *             schema:
  *               $ref: '#/components/schemas/ApiError'
  */
-router.get('/:id', getUserByIdHandler); // Get by ID
+router.get('/:id', getUserbyIdHandler); // Get by ID
 
 export default router;

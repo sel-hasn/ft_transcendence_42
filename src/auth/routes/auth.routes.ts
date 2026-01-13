@@ -1,16 +1,16 @@
 import { Router } from 'express';
+import { validateResource } from '../../middleware/validateResource.js';
 import {
-    loginHandler,
-    logoutHandler,
-    refreshAccessTokenHandler,
-    registerHandler
+  loginHandler,
+  signupHandler,
+  refreshAccessTokenHandler,
+  logoutHandler,
 } from '../controllers/auth.controller.js';
-import { requireUser } from '../middlewares/requireUser.js';
-import { validateResource } from '../middlewares/validateResource.js';
 import {
-    loginSchema,
-    registerSchema,
-    refreshSchema
+  loginSchema,
+  signupSchema,
+  refreshSchema,
+  logoutSchema,
 } from '../schemas/auth.schema.js';
 
 const router = Router();
@@ -21,7 +21,12 @@ const router = Router();
  * /auth/signup:
  *   post:
  *     summary: Register a new user
- *     description: Create a new user account with username, email, and password.
+ *     description: |
+ *       Create a new user account. Access and refresh tokens are automatically set in HTTP-only cookies.
+ *       
+ *       **Cookies Set:**
+ *       - accessToken (expires in 15 min)
+ *       - refreshToken (expires in 3 days)
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -31,27 +36,11 @@ const router = Router();
  *             $ref: '#/components/schemas/RegisterReq'
  *     responses:
  *       201:
- *         description: User created successfully
+ *         description: User created successfully with tokens set in cookies
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: success
- *                 data:
- *                   type: object
- *                   properties:
- *                     user:
- *                       type: object
- *                       properties:
- *                         id:
- *                           type: integer
- *                         username:
- *                           type: string
- *                         email:
- *                           type: string
+ *               $ref: '#/components/schemas/SignupRes'
  *       400:
  *         description: Validation error or missing fields
  *         content:
@@ -71,7 +60,7 @@ const router = Router();
  *             schema:
  *               $ref: '#/components/schemas/ApiError'
  */
-router.post('/signup', validateResource(registerSchema), registerHandler);
+router.post('/signup', validateResource(signupSchema), signupHandler);
 
 // Login
 /**
@@ -79,7 +68,16 @@ router.post('/signup', validateResource(registerSchema), registerHandler);
  * /auth/login:
  *   post:
  *     summary: Log in a user
- *     description: Authenticate a user with email and password to receive access and refresh tokens.
+ *     description: |
+ *       Authenticate a user with email and password.
+ *       
+ *       **Normal flow:** Tokens set in HTTP-only cookies automatically
+ *       
+ *       **2FA enabled:** Returns a temporary token. Use POST /auth/2fa/authenticate to complete login.
+ *       
+ *       **Cookies Set (if 2FA disabled):**
+ *       - accessToken (expires in 15 min)
+ *       - refreshToken (expires in 3 days)
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -89,22 +87,26 @@ router.post('/signup', validateResource(registerSchema), registerHandler);
  *             $ref: '#/components/schemas/LoginReq'
  *     responses:
  *       200:
- *         description: Login successful
+ *         description: Login successful (tokens in cookies) or 2FA required (tempToken in body)
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: success
- *                 tokens:
- *                   type: object
- *                   properties:
- *                     accessToken:
- *                       type: string
- *                     refreshToken:
- *                       type: string
+ *               oneOf:
+ *                 - $ref: '#/components/schemas/LoginRes'
+ *                 - $ref: '#/components/schemas/Login2FARequiredRes'
+ *             examples:
+ *               normalLogin:
+ *                 summary: Normal login (no 2FA) - tokens in cookies
+ *                 value:
+ *                   status: success
+ *                   message: Logged in successfully
+ *               twoFactorRequired:
+ *                 summary: 2FA required - tempToken in response
+ *                 value:
+ *                   status: success
+ *                   message: 2FA required
+ *                   action_required: 2fa_auth
+ *                   tempToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
  *       400:
  *         description: Invalid input
  *         content:
@@ -132,41 +134,26 @@ router.post('/login', validateResource(loginSchema), loginHandler);
  * /auth/refresh:
  *   post:
  *     summary: Refresh access token
- *     description: Get a new access token using a valid refresh token.
+ *     description: |
+ *       Get a new access token using the refresh token from cookies.
+ *       
+ *       **Cookie Required:** refreshToken (sent automatically by browser)
+ *       
+ *       **Cookie Updated:** accessToken (new token set in cookie)
  *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - refreshToken
- *             properties:
- *               refreshToken:
- *                 type: string
  *     responses:
  *       200:
- *         description: Access token refreshed
+ *         description: Access token refreshed and set in cookie
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: success
- *                 token:
- *                   type: string
- *                   description: New access token
- *       400:
- *         description: Refresh token is required
+ *               $ref: '#/components/schemas/RefreshTokenRes'
+ *       403:
+ *         description: Refresh token missing or invalid
  *         content:
  *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ApiError'
  *       401:
- *         description: Invalid or expired refresh token
+ *         description: Token expired or revoked
  *         content:
  *           application/json:
  *             schema:
@@ -186,13 +173,18 @@ router.post('/refresh', validateResource(refreshSchema), refreshAccessTokenHandl
  * /auth/logout:
  *   post:
  *     summary: Logout user
- *     description: Invalidate the current session and tokens.
- *     security:
- *       - bearerAuth: []
+ *     description: |
+ *       Blacklist both access and refresh tokens and clear cookies.
+ *       
+ *       **Cookies Used:** accessToken and refreshToken (sent automatically)
+ *       
+ *       **Actions:**
+ *       - Tokens added to blacklist database
+ *       - Cookies cleared from browser
  *     tags: [Auth]
  *     responses:
  *       200:
- *         description: Logout successful
+ *         description: Logout successful - tokens blacklisted and cookies cleared
  *         content:
  *           application/json:
  *             schema:
@@ -204,12 +196,9 @@ router.post('/refresh', validateResource(refreshSchema), refreshAccessTokenHandl
  *                 message:
  *                   type: string
  *                   example: Logged out successfully
- *       401:
- *         description: Unauthorized
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ApiError'
+ *       400:
+ *                   type: string
+ *                   example: Logged out successfully
  *       500:
  *         description: Internal server error
  *         content:
@@ -217,8 +206,6 @@ router.post('/refresh', validateResource(refreshSchema), refreshAccessTokenHandl
  *             schema:
  *               $ref: '#/components/schemas/ApiError'
  */
-router.post('/logout', logoutHandler);
-
-
+router.post('/logout', validateResource(logoutSchema), logoutHandler);
 
 export default router;
