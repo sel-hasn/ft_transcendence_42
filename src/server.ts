@@ -1,26 +1,24 @@
-//server.ts
-import { config } from './config/index.js';
-import app from './app.js';
-import { closeDb, initDatabase } from './core/database.js';
+import { initDatabase, closeDb } from './core/database.js';
+import { config } from './auth/config/index.js';
+import app from './auth/app.js';
 import { startCleanupJob } from './core/cron.js';
 
-// Initialize the database before starting the server
 initDatabase();
 startCleanupJob();
 
 const server = app.listen(config.port, () => {
-    console.log(`🚀 Server running on http://localhost:${config.port}`);
-    console.log(`📁 Environment: ${config.nodeEnv}`);
+  console.log(`🚀 Server is running on http://localhost:${config.port}`);
+  console.log(`Environment: ${config.nodeEnv}`);
 });
 
-const gracefulShutdown = (signal: string) => {
-    console.log(`${signal} signal received: Closing server...`);
+const gracefullyShutdown = (signal: string) => {
+  console.log(`\nReceived ${signal}. Shutting down gracefully...`);
 
-    server.close(() => {
-        closeDb();
-        process.exit(0);
-    });
+  server.close(() => {
+    closeDb();
+    process.exit(0);
+  });
 };
 
-process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('SIGINT', () => gracefullyShutdown('SIGINT'));
+process.on('SIGTERM', () => gracefullyShutdown('SIGTERM'));
