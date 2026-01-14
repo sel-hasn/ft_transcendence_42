@@ -7,7 +7,11 @@ CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE NOT NULL,
     email TEXT UNIQUE NOT NULL,
-    password_hash TEXT NOT NULL,
+    password_hash TEXT,
+
+    -- OAuth
+    google_id TEXT UNIQUE,
+
     avatar_url TEXT DEFAULT '/default-avatar.png',
     level INTEGER DEFAULT 1,          -- New: Player level (e.g. Lv. 24)
     is_2fa_enabled BOOLEAN DEFAULT 0,
@@ -26,20 +30,6 @@ CREATE TABLE IF NOT EXISTS users (
     win_streak INTEGER DEFAULT 0,     -- New: Track consecutive wins
     
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
--- OAuth Accounts
-CREATE TABLE IF NOT EXISTS oauth_accounts (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    provider TEXT NOT NULL CHECK(provider IN ('42', 'google', 'github')),
-    provider_user_id TEXT NOT NULL,
-    access_token TEXT,
-    refresh_token TEXT,
-    expires_at DATETIME,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    UNIQUE(provider, provider_user_id)
 );
 
 -- Token Blacklist (for server-side logout)

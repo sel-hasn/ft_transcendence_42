@@ -12,4 +12,6 @@ export const config = {
     '15m') as SignOptions['expiresIn'],
   jwtRefreshExpiresIn: (process.env.JWT_REFRESH_EXPIRES_IN ||
     '3d') as SignOptions['expiresIn'],
+  googleClientId: process.env.GOOGLE_CLIENT_ID,
+  googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
 };

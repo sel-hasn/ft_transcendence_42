@@ -7,6 +7,7 @@ import { signJwt, verifyJwt } from '../../utils/jwt.js';
 import { config } from '../config/index.js';
 import { User } from '../types.js';
 import type { JwtPayload } from 'jsonwebtoken';
+import passport from 'passport';
 
 const cookieOptions = {
 	httpOnly: true,

@@ -1,5 +1,6 @@
 import express, { Application, Request, Response, NextFunction } from 'express';
 import authRoutes from './routes/auth.routes.js';
+import oauthRoutes from './routes/oauth.routes.js';
 import userRoutes from './routes/user.routes.js';
 import twoFatRoutes from './routes/2fa.routes.js';
 import { AppError } from '../utils/AppError.js';
@@ -10,6 +11,8 @@ import cors from 'cors';
 import { swaggerSpec } from './config/swagger.js';
 import swaggerUi from 'swagger-ui-express';
 import cookieParser from 'cookie-parser';
+import passport from 'passport';
+import './config/passport.js'; // Initialize passport strategies
 
 const app: Application = express();
 
@@ -23,6 +26,9 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(cookieParser());
 
+// Initialize Passport
+app.use(passport.initialize());
+
 // Custom Middleware
 app.use(deserializeUser);
 
@@ -33,6 +39,7 @@ app.get('/', (req, res) => {
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api/auth', authRoutes);
+app.use('/api/oauth', oauthRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/auth/2fa', twoFatRoutes);
 
